@@ -10,19 +10,20 @@ import uk.ac.hope.mcse.segh.servermanagement.model.HardwareReading;
 @Repository
 public class DeleteOldReadingImpl implements DeleteOldReading {
 
+    //Uses the mongo template to ensure that the new method is compatible
     @Autowired
     private MongoTemplate mongoTemplate;
 
     @Override
     public void deleteOldReadingNotEndingWith(String cutoffDateTime) {
-       // Create a query to find documents with dateTime less than cutoffDateTime
-        // and dateTime not ending with the specified suffix ":00"
+        //Creates a query that looks for any record where the dateTime entry is after the provided current time and that does not end in ":00"
+        //In this way, all entries other than ones less than a minute old and taken on the turn of a minute will be deleted
         Query query = new Query(new Criteria().andOperator(
                 Criteria.where("dateTime").lt(cutoffDateTime),
                 Criteria.where("dateTime").not().regex(":00$")
         ));
 
-        // Delete all matching documents
+        //Removes all documents that match the query
         mongoTemplate.remove(query, HardwareReading.class);
     }
 }
